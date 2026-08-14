@@ -78,11 +78,19 @@ jar {
 }
 
 processResources {
+    // Convert the Maven-style range (used by neoforge.mods.toml) into Fabric's
+    // predicate syntax, e.g. "[1.21.1, 1.22)" -> ">=1.21.1 <1.22", so both loaders
+    // stay in sync from the single minecraft_version_range property.
+    var rangeBounds = minecraft_version_range.replaceAll(/[\[\]()]/, '').split(',')*.trim()
+    var upperExclusive = minecraft_version_range.trim().endsWith(')')
+    var minecraftVersionRangeFabric = ">=${rangeBounds[0]} ${upperExclusive ? '<' : '<='}${rangeBounds[1]}"
+
     var expandProps = [
             'version'                      : version,
             'group'                        : project.group,
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,
+            'minecraft_version_range_fabric': minecraftVersionRangeFabric,
             'fabric_loader_version'        : fabric_loader_version,
             'mod_name'                     : mod_name,
             'mod_author'                   : mod_author,
